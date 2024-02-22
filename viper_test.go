@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -59,4 +60,30 @@ func TestENV(t *testing.T) {
 
 	assrt.Nil(err)
 	assrt.Equal("belajar-golang-viper", config.GetString("APP_NAME"))
+}
+
+func TestAutomaticENV(t *testing.T) {
+	var assrt = assert.New(t)
+	var config = viper.New()
+	config.SetEnvPrefix("from") // will be uppercased automatically
+	config.BindEnv("env")       // will be uppercased automatically
+
+	os.Setenv("FROM_ENV", "Hello")
+
+	config.SetConfigFile("./config.env")
+	config.AddConfigPath(".")
+	config.AutomaticEnv()
+
+	err := config.ReadInConfig()
+
+	assrt.Nil(err)
+	assrt.Equal("belajar-golang-viper", config.GetString("APP_NAME"))
+	assrt.Equal("1.0.0", config.GetString("APP_VERSION"))
+	assrt.Equal("Jalaluddin Muh Akbar", config.GetString("APP_AUTHOR"))
+	assrt.Equal(true, config.GetBool("DATABASE_SHOW_SQL"))
+	assrt.Equal("localhost", config.GetString("DATABASE_HOST"))
+	assrt.Equal(3306, config.GetInt("DATABASE_PORT"))
+
+	assrt.Equal("Hello", config.GetString("env"))
+
 }
